@@ -1,0 +1,51 @@
+#Log install openvino sur linux
+#version 2021.4
+#https://docs.openvino.ai/2021.4/openvino_docs_install_guides_installing_openvino_linux.html
+
+#prérequis
+# CPU, GPU, NCS2 <-- Intel 
+
+#réalisé sur laptop avec cpu intel I5 7ème génération avec unbuntu 20.04 LTS
+
+# sur https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/download.html télécharger : Dev Tools, linux, 2021.4.2 LTS, Offline Installer.
+
+cd ~/Downloads/
+tar -xvzf l_openvino_toolkit_p_<version>.tgz
+cd l_openvino_toolkit_p_<version>
+sudo ./install_GUI.sh
+
+# Suivez les étapes à l'écran, à une étape il va être indiqué qu'il manque des 'prerequisites' installer les. Les versions nécessaires sont indiquées. Après une recherche google on trouve facilement ce qui nous manque 
+
+cd /opt/intel/openvino_2021/install_dependencies
+
+sudo -E ./install_openvino_dependencies.sh
+
+cd
+#entrez dans le bashed pour automatiser l'initialisation des variables.
+vi ~/.bashrc
+# aller à la fin du fichier puis appuyer sur i pour inserer et mettre la ligne suivante à la fin 
+source /opt/intel/openvino_2021/bin/setupvars.sh
+
+#Pour quitter le vi appuyer sur ESC puis :wq
+
+cd /opt/intel/openvino_2021/deployment_tools/model_optimizer/install_prerequisites
+sudo ./install_prerequisites.sh
+
+#pour utiliser le NSC2 :
+cd /opt/intel/openvino_2021/install_dependencies/
+./install_NCS_udev_rules.sh
+# reboot le pc
+
+#une fois que c'est installé, il faut télécharger les modèles, 
+
+cd deployment_tools/tools/model_downloader
+#il y a un fichier python downloader.py qui permet de télécharger les modèles.
+
+#Télécharger face-detection-retail-0004, landmarks-regression-retail-0009, face-reidentification-retail-0095
+
+# une fois les model télécharger suivre la doc de la démo.
+
+#https://docs.openvino.ai/latest/omz_demos_face_recognition_demo_python.html 
+
+
+

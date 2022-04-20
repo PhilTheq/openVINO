@@ -1,0 +1,71 @@
+#install openvino raspberry
+#https://docs.openvino.ai/2021.4/openvino_docs_install_guides_installing_openvino_raspbian.html
+# install openvino 2021.4
+
+#réalisé sur RPI 4 avec Raspbian* Buster, 32-bit
+
+
+
+#télécharger openvino 2021.4 depuis ce site
+# https://storage.openvinotoolkit.org/repositories/openvino/packages/
+
+cd ~/Downloads/
+
+#etre sur que CMake* 3.7.2 ou supérieur et python supérieur à python 3.5 est installé.
+
+
+sudo mkdir -p /opt/intel/openvino_2021
+
+sudo tar -xf  l_openvino_toolkit_runtime_raspbian_p_<version>.tgz --strip 1 -C /opt/intel/openvino_2021
+
+sudo apt install cmake
+
+source /opt/intel/openvino_2021/bin/setupvars.sh
+echo "source /opt/intel/openvino_2021/bin/setupvars.sh" >> ~/.bashrc
+
+#à ce stade si vous lancez un terminal vous devriez voir:
+
+[setupvars.sh] OpenVINO environment initialized
+
+
+
+# Pour NCS2
+
+sudo usermod -a -G users "$(whoami)"
+
+Reboot la RPI 
+
+sh /opt/intel/openvino_2021/install_dependencies/install_NCS_udev_rules.sh
+
+# test 
+Cd
+mkdir build && cd build
+
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-march=armv7-a" /opt/intel/openvino_2021/deployment_tools/inference_engine/samples/cpp
+
+make -j2 object_detection_sample_ssd
+
+#il est possible que ce git amène des problème une solution peut être de rajouté la commande : -b 2021.4.2
+git clone --depth 1 https://github.com/openvinotoolkit/open_model_zoo
+cd open_model_zoo/tools/model_tools
+python3 -m pip install -r requirements.in
+python3 downloader.py --name face-detection-adas-0001
+
+./armv7l/Release/object_detection_sample_ssd -m <path_to_model>/face-detection-adas-0001.xml -d MYRIAD -i <path_to_image>
+
+
+# A ce stade dans open_model_zoo vous pourrez trouver la demo : face récognition mais si vous essayé de la lancer après avoir téléchargé les différents modèles indiqué dans la doc il y a des erreurs que nous n'avons pas réussi à résoudre 
+Voici la doc https://docs.openvino.ai/latest/omz_demos_face_recognition_demo_python.html
+
+
+
+python3 ./face_recognition_demo.py \
+  -i /dev/video0 \
+  -m_fd /opt/intel/openvino_2021/deployment_tools/open_model_zoo/tools/downloader/intel/face-detection-retail-0004/FP16/face-detection-retail-0004.xml \
+  -m_lm /opt/intel/openvino_2021/deployment_tools/open_model_zoo/tools/downloader/intel/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml \
+  -m_reid /opt/intel/openvino_2021/deployment_tools/open_model_zoo/tools/downloader/intel/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml \
+  -d_fd MYRIAD
+  -d_lm MYRIAD
+  -d_reid MYRIAD
+  --verbose \
+  -fg /home/oem/Documents/pic
